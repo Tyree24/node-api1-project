@@ -90,5 +90,33 @@ server.delete('/api/users/:id', (req, res) => {
         res.status(404).json({ message: "The user with the specified ID does not exist." });
       }
     })
-
 });
+
+//PUT handler and new user
+server.put('/api/users/:id', (req, res) => {
+  const { id } = req.params;
+  const body = req.body;
+
+  db.findById(id)
+    .then(user => {
+      if (!user) {
+        res.status(404).json({ message: 'The user with the specified ID does not exist.' });
+      }
+    })
+
+  if (!body.name || !body.bio) {
+    res.status(400).json({ errorMessage: 'Please provide name and bio for the user' });
+  }
+
+  db.update(id, body)
+    .then(count => {
+      if (count === 0) {
+        res.status(500).json({ error: 'The user information could not be modified' });
+      } else {
+        db.findById(id)
+          .then(user => {
+            res.status(200).json(user);
+          });
+      }
+    })
+}) 
